@@ -1,0 +1,2 @@
+C:\Users\Yicheng Zhou\OneDrive\Desktop\UIUC\ECE 420\Lab 02\lab2\app\src\main\cpp\CMakeLists.txt
+C:\Users\Yicheng Zhou\OneDrive\Desktop\UIUC\ECE 420\Lab 02\lab2\app\src\main\cpp\ndk-stl-config.cmake
