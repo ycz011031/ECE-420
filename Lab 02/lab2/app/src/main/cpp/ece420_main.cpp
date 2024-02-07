@@ -6,7 +6,7 @@
 #include "ece420_main.h"
 
 // Student Variables
-#define FRAME_SIZE 128
+#define FRAME_SIZE 256
 
 // FIR Filter Function Defined here located at the bottom
 int16_t firFilter(int16_t sample);
@@ -19,10 +19,15 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
     // Using {} initializes all values in the array to zero
     int16_t bufferIn[FRAME_SIZE] = {};
     int16_t bufferOut[FRAME_SIZE] = {};
-
+    uint8_t buffer[FRAME_SIZE*2] = {};
+    uint8_t buffer_o[FRAME_SIZE*2] ={};
+    for (int k=0; k<FRAME_SIZE*2-1;k++){
+        buffer[k] = dataBuf -> buf_ [k];
+    }
     // Your buffer conversion (unpacking) here
     // Fetch data sample from dataBuf->buf_[], unpack and put into bufferIn[]
     // ******************** START YOUR CODE HERE ******************** //
+
 
     for (int i = 0; i< FRAME_SIZE; i++){
         bufferIn[i] = (int16_t)dataBuf->buf_[2*i]+(int16_t)dataBuf->buf_[2*i+1]*256;
@@ -38,6 +43,7 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
         int16_t sample = bufferIn[sampleIdx];
         // Call your filFilter funcion
         int16_t output = firFilter(sample);
+        //int16_t output = sample;
         // Grab result and put into bufferOut[]
         bufferOut[sampleIdx] = output;
     }
@@ -46,10 +52,13 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
     // Fetch data sample from bufferOut[], pack them and put back into dataBuf->buf_[]
     // ******************** START YOUR CODE HERE ******************** //
     for (int j=0 ; j < FRAME_SIZE; j++){
-        auto temp = bufferOut[j];
-        dataBuf -> buf_[2*j+1] = (uint8_t)(temp/256);
-        temp=temp*256;
-        dataBuf -> buf_[2*j] = (uint8_t)(temp/256);
+        uint8_t temp = bufferOut[j];
+        dataBuf -> buf_[2*j] = bufferOut[j];
+        dataBuf -> buf_[2*j+1] = (((uint16_t)bufferOut[j]-temp)>>8);
+
+    }
+    for (int k=0 ; k < FRAME_SIZE; k++){
+        buffer_o[k] = dataBuf -> buf_[k];
     }
 
 
@@ -63,53 +72,61 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
 }
 
 // TODO: Change N_TAPS to match your filter design
-#define N_TAPS 45
+#define N_TAPS 51
 // TODO: Change myfilter to contain the coefficients of your designed filter.
-double myfilter[N_TAPS] = {0.009484189519882358 ,
-                           0.01511762943375239 ,
-                           0.02121561332719457 ,
-                           0.027342760421280924 ,
-                           0.03297430386723425 ,
-                           0.037552702093525 ,
-                           0.04055468230137409 ,
-                           0.04155847492157301 ,
-                           0.04030053700470133 ,
-                           0.03671253542439821 ,
-                           0.030932533666379772 ,
-                           0.023288633486990912 ,
-                           0.01425797311578193 ,
-                           0.004408110340458147 ,
-                           -0.005669351573772391 ,
-                           -0.015422033132267844 ,
-                           -0.02438708163178623 ,
-                           -0.03222144487538158 ,
-                           -0.038709094766853414 ,
-                           -0.04374667324388587 ,
-                           -0.047313100307905614 ,
-                           -0.049431536288688745 ,
-                           0.9498668179269525 ,
-                           -0.049431536288688745 ,
-                           -0.047313100307905614 ,
-                           -0.04374667324388587 ,
-                           -0.038709094766853414 ,
-                           -0.03222144487538158 ,
-                           -0.02438708163178623 ,
-                           -0.015422033132267844 ,
-                           -0.005669351573772391 ,
-                           0.004408110340458147 ,
-                           0.01425797311578193 ,
-                           0.023288633486990912 ,
-                           0.030932533666379772 ,
-                           0.03671253542439821 ,
-                           0.04030053700470133 ,
-                           0.04155847492157301 ,
-                           0.04055468230137409 ,
-                           0.037552702093525 ,
-                           0.03297430386723425 ,
-                           0.027342760421280924 ,
-                           0.02121561332719457 ,
-                           0.01511762943375239 ,
-                           0.009484189519882358 ,};
+double myfilter[N_TAPS] = {0.008180792539787974 ,
+                           0.00337409314563651 ,
+                           -0.002733153283563368 ,
+                           -0.008069113761747742 ,
+                           -0.009925032654075648 ,
+                           -0.005858383893969195 ,
+                           0.005332949456855658 ,
+                           0.02295701199554409 ,
+                           0.04439247663267261 ,
+                           0.06573995310414397 ,
+                           0.08295204381726481 ,
+                           0.09302773220936715 ,
+                           0.09481279237136868 ,
+                           0.08909449838617894 ,
+                           0.07796271909842799 ,
+                           0.06371523254874101 ,
+                           0.047782739183163156 ,
+                           0.0301496202404391 ,
+                           0.009542342951647832 ,
+                           -0.01567128871508223 ,
+                           -0.046245571700661896 ,
+                           -0.08102528482199799 ,
+                           -0.11660481606651171 ,
+                           -0.14789861244111951 ,
+                           -0.16947488250868367 ,
+                           1.8228160327457188 ,
+                           -0.16947488250868367 ,
+                           -0.14789861244111951 ,
+                           -0.11660481606651171 ,
+                           -0.08102528482199799 ,
+                           -0.046245571700661896 ,
+                           -0.01567128871508223 ,
+                           0.009542342951647832 ,
+                           0.0301496202404391 ,
+                           0.047782739183163156 ,
+                           0.06371523254874101 ,
+                           0.07796271909842799 ,
+                           0.08909449838617894 ,
+                           0.09481279237136868 ,
+                           0.09302773220936715 ,
+                           0.08295204381726481 ,
+                           0.06573995310414397 ,
+                           0.04439247663267261 ,
+                           0.02295701199554409 ,
+                           0.005332949456855658 ,
+                           -0.005858383893969195 ,
+                           -0.009925032654075648 ,
+                           -0.008069113761747742 ,
+                           -0.002733153283563368 ,
+                           0.00337409314563651 ,
+                           0.008180792539787974 ,};
+
+
 
 // Circular Buffer
 int16_t circBuf[N_TAPS] = {};
@@ -119,7 +136,7 @@ int16_t circBufIdx = 0;
 int ready = 0;
 int16_t overflow(int16_t a){
     a = a+1;
-    if (a<45){
+    if (a<N_TAPS){
         return a;
     }
     else return 0;
@@ -141,15 +158,19 @@ int16_t firFilter(int16_t sample) {
     int16_t output = 0;
     circBuf[circBufIdx] = sample;
 
-
-    if (ready == 0 && circBufIdx == 44){
-        ready = 1;
-        circBufIdx = 0;
+    //double myfilter[N_TAPS] = {0};
+    //myfilter[0] = 1;
+    if (ready == 0){
+        if (circBufIdx == 44){
+            ready = 1;}
+        output = 0;
     }
     if (ready == 1){
         for (int i = 0; i < 45; i++){
             output = output+myfilter[i]*circBuf[overflow(circBufIdx+i)];
+            //output = output + 1;
         }
+        output = sample;
     }
     circBufIdx = overflow(circBufIdx);
 
