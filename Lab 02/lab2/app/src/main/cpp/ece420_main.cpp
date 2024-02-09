@@ -205,7 +205,7 @@ int16_t firFilter(int16_t sample) {
     //
     // Input 'sample' is the current sample x[n].
     // ******************** START YOUR CODE HERE ******************** //
-    int16_t output = 0;
+    double output = 0;
     circBuf[circBufIdx] = sample;
 
     //double myfilter[N_TAPS] = {0};
@@ -225,6 +225,6 @@ int16_t firFilter(int16_t sample) {
     circBufIdx = overflow(circBufIdx+1);
 
     // ********************* END YOUR CODE HERE ********************* //
-    return output;
+    return int16_t(output);
 }
 
