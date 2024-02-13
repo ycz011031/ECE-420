@@ -7,6 +7,8 @@
 #include "ece420_main.h"
 #include "ece420_lib.h"
 #include "kiss_fft/kiss_fft.h"
+#include <cmath>
+#include <math.h>
 
 // Declare JNI function
 extern "C" {
@@ -46,14 +48,39 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
     // add/change code outside this block to implement FFT buffer overlapping (extra credit part).
     // Keep all of your code changes within java/MainActivity and cpp/ece420_*
     // ********************* START YOUR CODE HERE *********************** //
-
-
     // thread-safe
     isWritingFft = true;
-    // Currently set everything to 0 or 1 so the spectrogram will just be blue and red stripped
-    for (int i = 0; i < FRAME_SIZE; i++) {
-        fftOut[i] = (i/20)%2;
+
+
+    float pi = 3.1415926535;
+    float window[FRAME_SIZE];
+    for (int i =0;i<FRAME_SIZE;i++){
+        window [i] = (0.54-0.46*cos((2*pi*i)/(FRAME_SIZE-1)));
     }
+    //initialize data array as zeros so that after data is loaded in, we have trailing zeros as padding
+    float data[FRAME_SIZE*2]={0};
+    for (int j=0;j<FRAME_SIZE;j++){
+        data[j] = bufferIn[j]*window[j];
+    }
+
+    kiss_fft_cpx fin[FFT_SIZE];
+    kiss_fft_cpx fout[FFT_SIZE];
+
+    for (int k=0;k<FFT_SIZE;k++){
+        fin[k].r = data[k];
+    }
+    kiss_fft_cfg cfg = kiss_fft_alloc(FFT_SIZE,0,NULL,NULL);
+    kiss_fft(cfg,fin,fout);
+    for (int l=0;l<FRAME_SIZE;l++){
+        fftOut[l] = log(fout[l].i*fout[l].i+fout[l].r*fout[l].r)/20;
+    }
+
+
+
+//    // Currently set everything to 0 or 1 so the spectrogram will just be blue and red stripped
+//    for (int i = 0; i < FRAME_SIZE; i++) {
+//        fftOut[i] = (i/20)%2;
+//    }
 
     // ********************* END YOUR CODE HERE ************************* //
     // Flip the flag so that the JNI thread will update the buffer
