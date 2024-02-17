@@ -19,6 +19,19 @@ Java_com_ece420_lab4_MainActivity_getFreqUpdate(JNIEnv *env, jclass);
 #define VOICED_THRESHOLD 123456789  // Find your own threshold
 float lastFreqDetected = -1;
 
+float getEnergy(float *bufferIn){
+    float E = 0;
+    for (int i = 0; i<FRAME_SIZE; i++){
+        E += bufferIn[i] * bufferIn[i];
+    }
+    return E;
+}
+
+
+
+
+
+
 void ece420ProcessFrame(sample_buf *dataBuf) {
     // Keep in mind, we only have 20ms to process each buffer!
     struct timeval start;
@@ -56,6 +69,47 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
     // Finally, write the variable "lastFreqDetected" on completion. If voiced,
     // write your determined frequency. If unvoiced, write -1.
     // ********************* START YOUR CODE HERE *********************** //
+    float threshold = (1800000000/2048)*FRAME_SIZE;
+
+
+    float E = 0;
+    for (int i = 0; i<FRAME_SIZE; i++){
+        E += bufferIn[i] * bufferIn[i];
+    }
+
+    if (E < threshold){
+        threshold = -1;
+        return;
+    }
+
+    kiss_fft_cpx fin[FRAME_SIZE];
+    kiss_fft_cpx fout[FRAME_SIZE];
+    kiss_fft_cpx fmulti[FRAME_SIZE];
+    kiss_fft_cpx output[FRAME_SIZE];
+
+    for (int k=0;k<FRAME_SIZE;k++){
+        fin[k].r = bufferIn[k];
+    }
+    kiss_fft_cfg cfg = kiss_fft_alloc(FRAME_SIZE,0,NULL,NULL);
+    kiss_fft(cfg,fin,fout);
+    for (int j=0;j<FRAME_SIZE;j++){
+        fmulti[j].r = fout[j].r*fout[j].r - (-1*fout[j].i)*fout[j].i;
+        fmulti[j].i = fout[j].r*fout[j].i + (-1*fout[j].i)*fout[j].r;
+    }
+    kiss_fft_cfg cfg_ = kiss_fft_alloc(FRAME_SIZE,1,NULL,NULL);
+    kiss_fft(cfg_,fmulti,output);
+
+    float stuff[FRAME_SIZE];
+    for (int itr = 0; itr<FRAME_SIZE;itr++){
+        stuff[itr] = output[itr].r;
+    }
+
+    int maxIdx = findMaxArrayIdx(stuff,int(F_S/270),int(F_S/60));
+
+    lastFreqDetected = F_S/maxIdx;
+
+
+
 
 
 

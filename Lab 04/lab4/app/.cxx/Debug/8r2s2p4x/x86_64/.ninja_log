@@ -1,0 +1,8 @@
+# ninja log v5
+45	317	7299077981978512	CMakeFiles/echo.dir/kiss_fft/kiss_fft.c.o	2f486e7802ab232e
+54	1386	7299077991567975	CMakeFiles/echo.dir/ece420_lib.cpp.o	695ec77434051280
+2	1688	7299077994270763	CMakeFiles/echo.dir/audio_common.cpp.o	1f247e929667be06
+36	1811	7299077996155707	CMakeFiles/echo.dir/debug_utils.cpp.o	597a0a07df552f1b
+18	1819	7299077996036030	CMakeFiles/echo.dir/audio_player.cpp.o	8736085db107667c
+10	1972	7299077998097595	CMakeFiles/echo.dir/audio_main.cpp.o	423edd79982feb5
+25	2032	7299077999134801	CMakeFiles/echo.dir/audio_recorder.cpp.o	52249f98273efcca
