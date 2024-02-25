@@ -14,7 +14,7 @@ N = len(audio_data)
 
 ######################## YOUR CODE HERE ##############################
 
-F_new = 300
+F_new = 400
 new_epoch_spacing = F_s//F_new
 
 #print (epoch_marks_orig)
@@ -115,9 +115,17 @@ print ("  ")
 print ("DEBUG: debug_epoch_map:" , debug_epoch_map[:10])
 print ("DEBUG: original epoch marks", epoch_marks_orig[:10])
 plt.figure()
-plt.title('new')
-plt.plot(audio_out[0:2000])
-plt.plot(audio_data[0:2000])
+plt.title('zoomed in audio_out at F_new = 400')
+plt.xlabel("sample index")
+plt.ylabel("magnitude")
+plt.plot(audio_out[100:2100])
+
+plt.figure()
+plt.plot(audio_out)
+plt.title("entire audio_out at F_new = 400 ")
+plt.xlabel("sample index")
+plt.ylabel("magnitude")
+#plt.plot(audio_data[0:2000])
 plt.show()
 
 audio_out = audio_out.astype('int16')
