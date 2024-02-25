@@ -14,7 +14,7 @@ N = len(audio_data)
 
 ######################## YOUR CODE HERE ##############################
 
-F_new = 600
+F_new = 300
 new_epoch_spacing = F_s//F_new
 
 #print (epoch_marks_orig)
@@ -55,7 +55,9 @@ def window_apply (a,b):
     return output
 
 def sample_addition(a,b,start):
-    for x in range(len(b)):
+    for x in range(len(b)-1):
+        if (start+x > 170267):
+            break
         a[start+x]+=b[x]
     return
         
@@ -80,7 +82,7 @@ for i in range(0, N, new_epoch_spacing):
     debug_epoch_map.append(epoch_marks_orig[itr])
 
     
-    epoch_marks_orig = np.append(epoch_marks_orig,len(audio_data))
+    epoch_marks_orig = np.append(epoch_marks_orig,len(audio_data)-1000)
 
     p0 = int(abs((epoch_marks_orig[itr-1])-(epoch_marks_orig[itr+1]))/2)
     epoch_marks_orig = np.delete(epoch_marks_orig,len(epoch_marks_orig)-1)
@@ -88,7 +90,7 @@ for i in range(0, N, new_epoch_spacing):
 
 
 
-    window = np.hanning(p0*2+1)
+    window = np.hanning(p0*2)
     print("debug po = ", p0)
     #print ("event b")
 
@@ -96,10 +98,11 @@ for i in range(0, N, new_epoch_spacing):
     
     #print("debug window leangth",len(window))
     
-    windowed_sample = window_apply(audio_data[i-p0:i+p0+1] ,window)
+    windowed_sample = window_apply(audio_data[epoch_marks_orig[itr]-p0:epoch_marks_orig[itr]+p0] ,window)
     #print ("event c")
 
     #audio_out[i-p0:p0+i+1] += windowed_sample
+    print("debug audio_out length", len(audio_out))
 
     sample_addition(audio_out,windowed_sample,i-p0)
     
@@ -112,7 +115,9 @@ print ("  ")
 print ("DEBUG: debug_epoch_map:" , debug_epoch_map[:10])
 print ("DEBUG: original epoch marks", epoch_marks_orig[:10])
 plt.figure()
-plt.plot(audio_out)
+plt.title('new')
+plt.plot(audio_out[0:2000])
+plt.plot(audio_data[0:2000])
 plt.show()
 
 audio_out = audio_out.astype('int16')
