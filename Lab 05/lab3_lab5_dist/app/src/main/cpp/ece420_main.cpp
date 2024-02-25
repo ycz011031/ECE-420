@@ -51,6 +51,29 @@ float fftOut[FFT_SIZE] = {};
 bool isWritingFft = false;
 
 
+int find_map(float new_epoch, float *org_epoch, int epoch_idx){
+    int itr = epoch_idx;
+    float delta_min = 0;
+    float delta_new = 0;
+    for(int i = epoch_idx; i <sizeof(org_epoch);i++){
+        if(i == epoch_idx){
+            delta_min = abs(new_epoch-org_epoch[i]);
+        }
+        else{
+            delta_new = abs(new_epoch-org_epoch[i]);
+            if (delta_new <= delta_min){
+                delta_min = delta_new;
+                itr = i;
+            }
+            else{
+                return itr;
+            }
+        }
+
+    }
+    return itr;
+}
+
 bool lab5PitchShift(float *bufferIn) {
     // Lab 4 code is condensed into this function
     int periodLen = detectBufferPeriod(bufferIn);
@@ -74,13 +97,40 @@ bool lab5PitchShift(float *bufferIn) {
         // findClosestInVector();
         // overlapAndAdd();
         // *********************** START YOUR CODE HERE  **************************** //
+        int new_epoch_spacing = F_S/FREQ_NEW;
+        int N = FRAME_SIZE;
+        int epoch_mark = 0;
 
+        float audio_out[3*1024];
 
+        //getting new epoch locations
+        for (float x=0; x<(float)N; x+=(float)new_epoch_spacing){
+            auto itr = findClosestInVector(epochLocations,x,epoch_mark,(sizeof(epochLocations))-1);
+            epoch_mark = itr;
 
+            float p0 = abs(epochLocations[itr-1] - epochLocations[itr+1])/2;
 
+            //window generation
+            float window[(int)p0*2];
+            for (int y=0; y<2*p0;y++){
+                window[y] = getHanningCoef(p0*2,y);
+            }
 
+            //window application
+            float windowed_sample[2*(int)p0];
+            for (int z=0;z<sizeof(window);z++){
+                int ptr = (int)epochLocations[itr]-(int)p0+z;
+                windowed_sample[z] = window[z]*bufferIn[ptr];
+            }
 
+            //sample localization
+            overlapAddArray(audio_out,windowed_sample,x-(int)p0,2*(int)p0);
+        }
 
+        //casting audio_out into bufferOut
+        for (int idx = 0; idx<sizeof(bufferOut); idx++){
+            bufferOut [idx] = audio_out[1024+idx];
+        }
 
         // ************************ END YOUR CODE HERE  ***************************** //
     }
@@ -157,6 +207,28 @@ void ece420ProcessFrame(sample_buf *dataBuf) {
     // Keep all of your code changes within java/MainActivity and cpp/ece420_*
     // ********************* START YOUR CODE HERE *********************** //
     // ********************* RE-USE Lab3 CODE HERE *********************** //
+    float pi = 3.1415926535;
+    float window[FRAME_SIZE];
+    for (int i =0;i<FRAME_SIZE;i++){
+        window [i] = (0.54-0.46*cos((2*pi*i)/(FRAME_SIZE-1)));
+    }
+    //initialize data array as zeros so that after data is loaded in, we have trailing zeros as padding
+    float data_[FRAME_SIZE*2]={0};
+    for (int j=0;j<FRAME_SIZE;j++){
+        data[j] = bufferOut[j]*window[j];
+    }
+
+    kiss_fft_cpx fin[FFT_SIZE];
+    kiss_fft_cpx fout_[FFT_SIZE];
+
+    for (int k=0;k<FFT_SIZE;k++){
+        fin[k].r = data_[k];
+    }
+    kiss_fft_cfg cfg = kiss_fft_alloc(FFT_SIZE,0,NULL,NULL);
+    kiss_fft(cfg,fin,fout_);
+    for (int l=0;l<FRAME_SIZE;l++){
+        fftOut[l] = log(fout_[l].i*fout_[l].i+fout_[l].r*fout_[l].r)/20;
+    }
 
 
 
