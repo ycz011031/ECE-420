@@ -56,10 +56,15 @@ bool lab5PitchShift(float *bufferIn) {
         int N = FRAME_SIZE;
         int epoch_mark = 0;
 
+        //removing duplicates in epochlocations
+        auto target = std::unique(epochLocations.begin(),epochLocations.end());
+        epochLocations.erase(target);
+
+
         std::vector<float> audio_out(3*1024);
 
         //getting new epoch locations
-        for (float x=0; x<(float)N; x+=(float)new_epoch_spacing){
+        for (float x=(float)N; x<(float)N*2; x+=(float)new_epoch_spacing){
             auto itr = findClosestInVector(epochLocations,x,epoch_mark,(sizeof(epochLocations))-1);
             epoch_mark = itr;
 
@@ -83,9 +88,8 @@ bool lab5PitchShift(float *bufferIn) {
         }
 
         //casting audio_out into bufferOut
-        for (int idx = 0; idx<sizeof(bufferOut); idx++){
-            bufferOut [idx] = audio_out[1024+idx];
-        }
+        bufferOut = audio_out;
+
 
         // ************************ END YOUR CODE HERE  ***************************** //
     }
