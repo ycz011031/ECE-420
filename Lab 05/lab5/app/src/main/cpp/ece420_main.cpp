@@ -53,7 +53,7 @@ bool lab5PitchShift(float *bufferIn) {
         // overlapAndAdd();
         // *********************** START YOUR CODE HERE  **************************** //
         int new_epoch_spacing = F_S/FREQ_NEW;
-        int N = FRAME_SIZE;
+        //int N = FRAME_SIZE;
         int epoch_mark = 0;
 
         //removing duplicates in epochlocations
@@ -61,34 +61,37 @@ bool lab5PitchShift(float *bufferIn) {
         epochLocations.erase(target);
 
 
-        std::vector<float> audio_out(3*1024);
+        //std::vector<float> audio_out(3*1024);
 
         //getting new epoch locations
-        for (float x=(float)N; x<(float)N*2; x+=(float)new_epoch_spacing){
-            auto itr = findClosestInVector(epochLocations,x,epoch_mark,(sizeof(epochLocations))-1);
+        for (float x=FRAME_SIZE; x<FRAME_SIZE*2; x+=(float)new_epoch_spacing){
+        //for (int test = 0; test < sizeof(epochLocations); test++){
+            //auto x =epochLocations[test];
+            auto itr = findClosestInVector(epochLocations,x,epoch_mark,(epochLocations).size()-1);
             epoch_mark = itr;
 
-            float p0 = abs(epochLocations[itr-1] - epochLocations[itr+1])/2;
+            auto p0 = abs(epochLocations[itr-1] - epochLocations[itr+1])/2;
 
             //window generation
-            std::vector<float> window((int)p0*2);
-            for (int y=0; y<2*p0;y++){
-                window[y] = getHanningCoef(p0*2,y);
-            }
+//            std::vector<float> window((int)p0*2);
+//            for (int y=0; y<2*p0+1;y++){
+//                window[y] = getHanningCoef(p0*2,y);
+//            }
 
             //window application
-            std::vector<float> windowed_sample(2*(int)p0);
-            for (int z=0;z<sizeof(window);z++){
-                int ptr = (int)epochLocations[itr]-(int)p0+z;
-                windowed_sample[z] = window[z]*bufferIn[ptr];
+            std::vector<float> windowed_sample(2*(int)p0+1);
+            for (int z=0;z<2*p0;z++){
+//                int ptr = (int)epochLocations[itr]-(int)p0+z;
+                int ptr = epochLocations[itr]-p0+z;
+//                windowed_sample[z] = window[z]*bufferIn[ptr];
+                windowed_sample[z] = 1*bufferIn[ptr];
             }
 
             //sample localization
-            overlapAddArray(audio_out.data(),windowed_sample.data(),x-(int)p0,2*(int)p0);
+            overlapAddArray(bufferOut,windowed_sample.data(),FRAME_SIZE+(int)x-p0,2*p0);
         }
 
-        //casting audio_out into bufferOut
-        bufferOut = audio_out;
+
 
 
         // ************************ END YOUR CODE HERE  ***************************** //
