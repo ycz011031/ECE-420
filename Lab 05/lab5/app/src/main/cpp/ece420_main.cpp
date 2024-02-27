@@ -56,7 +56,7 @@ bool lab5PitchShift(float *bufferIn) {
         int N = FRAME_SIZE;
         int epoch_mark = 0;
 
-        float audio_out[3*1024];
+        std::vector<float> audio_out(3*1024);
 
         //getting new epoch locations
         for (float x=0; x<(float)N; x+=(float)new_epoch_spacing){
@@ -66,33 +66,26 @@ bool lab5PitchShift(float *bufferIn) {
             float p0 = abs(epochLocations[itr-1] - epochLocations[itr+1])/2;
 
             //window generation
-            float window[(int)p0*2];
+            std::vector<float> window((int)p0*2);
             for (int y=0; y<2*p0;y++){
                 window[y] = getHanningCoef(p0*2,y);
             }
 
             //window application
-            float windowed_sample[2*(int)p0];
+            std::vector<float> windowed_sample(2*(int)p0);
             for (int z=0;z<sizeof(window);z++){
                 int ptr = (int)epochLocations[itr]-(int)p0+z;
                 windowed_sample[z] = window[z]*bufferIn[ptr];
             }
 
             //sample localization
-            overlapAddArray(audio_out,windowed_sample,x-(int)p0,2*(int)p0);
+            overlapAddArray(audio_out.data(),windowed_sample.data(),x-(int)p0,2*(int)p0);
         }
 
         //casting audio_out into bufferOut
         for (int idx = 0; idx<sizeof(bufferOut); idx++){
             bufferOut [idx] = audio_out[1024+idx];
         }
-
-
-
-
-
-
-
 
         // ************************ END YOUR CODE HERE  ***************************** //
     }
