@@ -210,24 +210,25 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         int[] cdf  = new int[256];
         int[] h    = new int[256];
         int[] data_= new int[array_len];
+        int[] data_o = new int[array_len];
 
-        for (int ptr=0;ptr<array_len;ptr++){
+        for (int ptr=0;ptr<array_len-1;ptr++){
             data_[ptr] = data[ptr] & 0xFF;
         }
 
-        for (int i=0; i<255; i++){
+        for (int i=0; i<256; i++){
             hist[i] = 0;
             cdf[i] = 0;
         }
 
-        for (int j=0; j<array_len; j++){
+        for (int j=0; j<array_len-1; j++){
             hist[(int)data_[j]] +=1;
         }
 
         int cdf_v = 0;
         int cdf_min = 0;
         int flag = 0;
-        for (int k=0; k<255;k++){
+        for (int k=0; k<256;k++){
             if(cdf_v != 0 && flag ==0){
                 cdf_min = cdf_v;
                 flag =1;
@@ -236,18 +237,21 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             cdf[k] += cdf_v;
         }
 
-        for (int l=0; l<255;l++){
-            h[l] = ((cdf[l]-cdf_min)*255/size-cdf_min);
+        for (int l=0; l<256;l++){
+            h[l] = ((cdf[l]-cdf_min)*255/(size-1));
         }
 
         int itr =0;
         int temp;
-        for (int m=0; m<array_len; m++){
+        for (int m=0; m<array_len-1; m++){
             itr = data_[m];
-            temp = (h[itr]&0xFF);
+            temp = (h[itr]);
+            data_o[m] = h[itr];
             if (temp > 255) temp = 255;
             if (temp<0) temp = 0;
-            data[m] = (byte)temp;
+            temp = (h[itr]&0xFF);
+
+            histeqData[m] = (byte)temp;
         }
 
         // *********************** End YOUR CODE HERE  **************************** //
