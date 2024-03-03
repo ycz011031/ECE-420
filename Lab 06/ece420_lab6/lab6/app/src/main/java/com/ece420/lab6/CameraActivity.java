@@ -205,8 +205,50 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         // Note that you only need to manipulate data[0:size] that corresponds to luminance
         // The rest data[size:data.length] is for colorness that we handle for you
         // *********************** START YOUR CODE HERE  **************************** //
+        int array_len = width *height;
+        int[] hist = new int[256];
+        int[] cdf  = new int[256];
+        int[] h    = new int[256];
+        int[] data_= new int[array_len];
 
+        for (int ptr=0;ptr<array_len;ptr++){
+            data_[ptr] = data[ptr] & 0xFF;
+        }
 
+        for (int i=0; i<255; i++){
+            hist[i] = 0;
+            cdf[i] = 0;
+        }
+
+        for (int j=0; j<array_len; j++){
+            hist[(int)data_[j]] +=1;
+        }
+
+        int cdf_v = 0;
+        int cdf_min = 0;
+        int flag = 0;
+        for (int k=0; k<255;k++){
+            if(cdf_v != 0 && flag ==0){
+                cdf_min = cdf_v;
+                flag =1;
+            }
+            cdf_v += hist[k];
+            cdf[k] += cdf_v;
+        }
+
+        for (int l=0; l<255;l++){
+            h[l] = ((cdf[l]-cdf_min)*255/size-cdf_min);
+        }
+
+        int itr =0;
+        int temp;
+        for (int m=0; m<array_len; m++){
+            itr = data_[m];
+            temp = (h[itr]&0xFF);
+            if (temp > 255) temp = 255;
+            if (temp<0) temp = 0;
+            data[m] = (byte)temp;
+        }
 
         // *********************** End YOUR CODE HERE  **************************** //
         // We copy the colorness part for you, do not modify if you want rgb images
@@ -214,6 +256,31 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
             histeqData[i] = data[i];
         }
         return histeqData;
+    }
+
+
+    public byte get_pixel(byte[] data, int itr, int width, int height, double kernel[][]){
+        double return_val = 0;
+        double pic_data;
+        int off_x = (int)((kernel.length-1)/2);
+        int off_y = (int)((kernel[0].length-1)/2);
+        int x_cor;
+        int y_cor;
+
+        for (int i=0; i<kernel.length;i++){
+            for (int j=0; j<kernel[i].length;j++){
+                x_cor = itr%width - off_x +i;
+                y_cor = (int)itr/width - off_y +j;
+                if (x_cor<0 || x_cor >= width || y_cor <0 || y_cor >= height){
+                    pic_data = 0;
+                }
+                else{
+                    pic_data = (double)data[y_cor*width+x_cor];
+                }
+                return_val += pic_data*kernel[i][j];
+            }
+        }
+        return (byte)return_val;
     }
 
     public int[] conv2(byte[] data, int width, int height, double kernel[][]){
@@ -225,9 +292,9 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
         // Note that you only need to manipulate data[0:size] that corresponds to luminance
         // The rest data[size:data.length] is ignored since we only want grayscale output
         // *********************** START YOUR CODE HERE  **************************** //
-
-
-
+        for (int itr = 0; itr<size;itr++){
+            convData[itr] = get_pixel(data,itr,width,height,kernel);
+        }
         // *********************** End YOUR CODE HERE  **************************** //
         return convData;
     }
