@@ -266,6 +266,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
     public byte get_pixel(byte[] data, int itr, int width, int height, double kernel[][]){
         double return_val = 0;
         double pic_data;
+        int result;
         int off_x = (int)((kernel.length-1)/2);
         int off_y = (int)((kernel[0].length-1)/2);
         int x_cor;
@@ -279,12 +280,18 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
                     pic_data = 0;
                 }
                 else{
-                    pic_data = (double)data[y_cor*width+x_cor];
+                    pic_data = (double)(data[y_cor*width+x_cor]& 0xFF);
                 }
                 return_val += pic_data*kernel[i][j];
+//                if (return_val>255){
+//                    return_val = 255;
+//                }
             }
         }
-        return (byte)return_val;
+        result =(int)(return_val*255/455);
+
+
+        return (byte)(result & 0xFF);
     }
 
     public int[] conv2(byte[] data, int width, int height, double kernel[][]){
