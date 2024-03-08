@@ -288,6 +288,7 @@ public class CameraActivity extends AppCompatActivity implements SurfaceHolder.C
 //                }
             }
         }
+        // normalizing return_value to avoid overflow during data conversion
         result =(int)(return_val*255/455);
 
 
