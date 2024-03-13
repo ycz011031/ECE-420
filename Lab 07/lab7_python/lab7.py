@@ -3,8 +3,8 @@ import sys
 
 
 # Load video, 0 for webcam, str for path to video
-video = cv2.VideoCapture(0)
-# video = cv2.VideoCapture('test_clip.mp4')
+#video = cv2.VideoCapture(0)
+video = cv2.VideoCapture('test_clip.mp4')
 
 # Exit if video not opened.
 if not video.isOpened():
@@ -64,6 +64,9 @@ while True:
         # 2. Initialize KCF Tracker with grayscale image and ROI
         # 3. Modify tracking flag to start tracking
         # Your code starts here
+        tracker = cv2.TrackerKCF_create()
+        flag = tracker.init(frame,roi)
+        tracking_flag = 1
         
 
 
@@ -73,6 +76,12 @@ while True:
         # If failed, print text "Tracking failure occurred!" at top left corner of the frame
         # Calculate and display "FPS@fps_value" at top right corner of the frame
         # Your code starts here
+        flag, roi = tracker.update(frame)
+        if not(flag):
+            cv2.putText(frame,"Tracking failure occured!",(10,30),cv2.FONT_HERSHEY_DUPLEX,0.75,(0,255,0),2)
+        fps = cv2.getTickFrequency()/(cv2.getTickCount() - start)
+        cv2.putText(frame,"FPS@"+str(fps),(400,30),cv2.FONT_HERSHEY_DUPLEX,0.75,(0,255,0),2)
+
 
 
     # Draw ROI Rectangle
