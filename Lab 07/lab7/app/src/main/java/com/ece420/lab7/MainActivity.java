@@ -292,6 +292,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // 2. Initialize KCF Tracker with grayscale image and ROI
             // 3. Modify tracking flag to start tracking
             // ******************** START YOUR CODE HERE ******************** //
+            myTacker = TrackerKCF.create();
+            boolean flag = myTacker.init(mGray, myROI);
+            tracking_flag = 1;
 
 
 
@@ -302,9 +305,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             // If failed, print text "Tracking failure occurred!" at top left corner of the frame
             // Calculate and display "FPS@fps_value" at top right corner of the frame
             // ******************** START YOUR CODE HERE ******************** //
+            boolean flag = myTacker.update(mGray,myROI);
+            if (!flag){
+                Imgproc.putText(mRgba,"Tracking failure occurred!",new Point(10,30), 3, 1,new Scalar(255,0,0,255),2);
+            }
 
-
-
+            int fps = (int)(Core.getTickFrequency()/ (Core.getTickCount()-start));
+            Imgproc.putText(mRgba,"FPS@" + (fps),new Point(mRgba.width()-150,30), 3, 1,new Scalar(0,0,255,255),2);
             // ******************** END YOUR CODE HERE ******************** //
         }
 
