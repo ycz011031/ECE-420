@@ -80,7 +80,7 @@ while True:
         if not(flag):
             cv2.putText(frame,"Tracking failure occured!",(10,30),cv2.FONT_HERSHEY_DUPLEX,0.75,(0,255,0),2)
         fps = cv2.getTickFrequency()/(cv2.getTickCount() - start)
-        cv2.putText(frame,"FPS@"+str(fps),(400,30),cv2.FONT_HERSHEY_DUPLEX,0.75,(0,255,0),2)
+        cv2.putText(frame,"FPS@"+str(fps),(40,30),cv2.FONT_HERSHEY_DUPLEX,0.75,(0,255,0),2)
 
 
 
